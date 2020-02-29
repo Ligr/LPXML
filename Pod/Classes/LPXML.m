@@ -51,15 +51,15 @@
 	return [self initWithHtmlData:data encoding:encoding];
 }
 
-- (NSString *)contentForXpath:(NSString *)xpath {
+- (NSArray<NSString *> *)contentForXpath:(NSString *)xpath; {
 	xmlNodeSetPtr xpathResult = [self performXpathQuery:xpath doc:_doc];
-	NSMutableString *content = [NSMutableString new];
+    NSMutableArray<NSString *> *results = [NSMutableArray new];
 	if (xpathResult) {
 		for (NSInteger i = 0; i < xpathResult->nodeNr; i++) {
 			xmlNodePtr xmlNode = xpathResult->nodeTab[i];
 			xmlBufferPtr buff = xmlBufferCreate();
 			int level = 0;
-			int format = 1;
+			int format = 0;
 			int result = xmlNodeDump(buff, _doc, xmlNode, level, format);
 			NSString *xmlNodeStr = nil;
 			if (result > -1) {
@@ -69,11 +69,11 @@
 			}
 			xmlBufferFree(buff);
 			if (xmlNodeStr) {
-				[content appendString:xmlNodeStr];
+                [results addObject:xmlNodeStr];
 			}
 		}
 	}
-	return content;
+	return results;
 }
 
 #pragma mark - Private

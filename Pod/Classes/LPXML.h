@@ -15,6 +15,6 @@
 - (instancetype)initWithString:(NSString *)str encoding:(NSStringEncoding)encoding;
 - (instancetype)initWithHtmlString:(NSString *)str encoding:(NSStringEncoding)encoding;
 
-- (NSString *)contentForXpath:(NSString *)xpath;
+- (NSArray<NSString *> *)contentForXpath:(NSString *)xpath;
 
 @end
