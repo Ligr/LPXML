@@ -41,6 +41,11 @@
 	return self;
 }
 
+- (void)dealloc
+{
+    xmlFreeDoc(_doc);
+}
+
 - (instancetype)initWithString:(NSString *)str encoding:(NSStringEncoding)encoding {
 	NSData *data = [str dataUsingEncoding:encoding];
 	return [self initWithData:data encoding:encoding];
@@ -52,7 +57,8 @@
 }
 
 - (NSArray<NSString *> *)contentForXpath:(NSString *)xpath; {
-	xmlNodeSetPtr xpathResult = [self performXpathQuery:xpath doc:_doc];
+    xmlXPathObjectPtr xpathObject = [self performXpathQuery:xpath doc:_doc];
+	xmlNodeSetPtr xpathResult = xpathObject->nodesetval;
     NSMutableArray<NSString *> *results = [NSMutableArray new];
 	if (xpathResult) {
 		for (NSInteger i = 0; i < xpathResult->nodeNr; i++) {
@@ -73,6 +79,7 @@
 			}
 		}
 	}
+    xmlXPathFreeObject(xpathObject);
 	return results;
 }
 
@@ -101,7 +108,7 @@
 	return content;
 }
 
-- (xmlNodeSetPtr)performXpathQuery:(NSString *)query doc:(xmlDocPtr)doc {
+- (xmlXPathObjectPtr)performXpathQuery:(NSString *)query doc:(xmlDocPtr)doc {
 	xmlXPathContextPtr xpathCtx;
 	xmlXPathObjectPtr xpathObj;
  
@@ -115,17 +122,9 @@
 	/* Evaluate XPath expression */
 	xmlChar *queryString = (xmlChar *)[query cStringUsingEncoding:NSUTF8StringEncoding];
 	xpathObj = xmlXPathEvalExpression(queryString, xpathCtx);
-	if (xpathObj == NULL) {
-		NSLog(@"Unable to evaluate XPath.");
-		return nil;
-	}
-	
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	if (!nodes) {
-		NSLog(@"Nodes was nil.");
-		return nil;
-	}
-	return nodes;
+
+    xmlXPathFreeContext(xpathCtx);
+	return xpathObj;
 }
 
 @end
